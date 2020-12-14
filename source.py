@@ -182,7 +182,7 @@ def momentCS(wall_type):
     return 0.5*(Use_FTGwidth-wall_width_ft)-(assumed_effective_depth_d_in/12)
   else:
     print('Please enter a wall type')
-L_moment=momentCS(str(input()))                     # enter type of wall: either 'masonry' or 'concrete'
+L_moment=momentCS(str(input()))           # enter type of wall: either 'masonry' or 'concrete'
 
 # Maximum Factored moment
 moment_Mu=0.5*factoredSoilPress_ksf*L_moment**2

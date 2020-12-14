@@ -53,3 +53,21 @@ Finally, install the required libraries for this program with:
 $ pip install -r requirements.txt
 
 ```
+
+## This is how to use the program
+
+* initiate by input values for :
+* Service dead and live loads in kip-ft
+* fc and fy in f_c_psi
+* weight of earth (assumed to be 100 pcf)
+* allowable soil pressure in ksf
+* Distance between footing bottom and ground in ft
+* assumed footing thickness (initial) in in.
+* bar assumption ( can be #3-#11)
+
+* Later in the calculations also input:
+* wall type into function momentCS
+* Design of tension steel and longitudinal steel: enter the corresponding user preference from the list of areas available that Satisfy the ACI
+* reinforcement location, coating, and reinforcement size factors for the development length
+
+* The program will then help calculate results for initial calculations, shear, check for adequacy, moment, areas of steel(tension as well as longitudinal), development length. It will provide design options(already satisfy ACI) for the steel reinforcement, and user can choose any preferred from the list.  
