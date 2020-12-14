@@ -1,6 +1,6 @@
 # Imports
 Import numpy as np
-Import math
+
 #Assumption (ACI)
 wall_width_ft=1
 w_e_lbperft3=100
@@ -165,7 +165,7 @@ assumed_effective_depth_d_in=assumed_FTG_thickness_in-3-0.5*(bar_diameter)
 L=0.5*(Use_FTGwidth-wall_width_ft)-(assumed_effective_depth_d_in/12)
 shear_Vu_kip_per_ftofwall=factoredSoilPress_ksf*np.round(L,2)
 # Calculates Total shear strength
-shear_strength_phiVc_kip_per_ftofwall=(0.75*2*math.sqrt(f_c_psi)*(wall_width_ft*12)*(assumed_effective_depth_d_in))/1000
+shear_strength_phiVc_kip_per_ftofwall=(0.75*2*np.sqrt(f_c_psi)*(wall_width_ft*12)*(assumed_effective_depth_d_in))/1000
 # Shear check
 if shear_Vu_kip_per_ftofwall<shear_strength_phiVc_kip_per_ftofwall:
   print("The assumed thickness of footing is satisfactory for shear, no revisions are necessary with respect to footing weight")
@@ -201,7 +201,7 @@ for kbar, rho_Options in table_of_reference_dict.items():
     if kbar>=reqKbar:
       listofrho.append(rho_Options)
       rho=np.min(listofrho)
-rho    
+rho
 # Required Area of Tension Steel:
 reqA_s=rho*(wall_width_ft*12)*assumed_effective_depth_d_in
 As_min=TableA5[f_y,f_c_psi]*(wall_width_ft*12)*assumed_effective_depth_d_in
@@ -224,7 +224,7 @@ print("Bar spacing(second number of tuple):")
 bar_spacing=int(input())
 
 As_provided=TableA4[(bar_number,bar_spacing)]
-print("Use No.",bar_chosen," at ", bar_spacing, "in.oc. (As = ",As_provided,"in^2).")
+print("Use No.",bar_number," at ", bar_spacing, "in.oc. (As = ",As_provided,"in^2).")
 
 #------------------------------------------------------------------------------------------------------------
 # Calculation of development length and Check:
@@ -251,7 +251,7 @@ K_ER=Controlling_As/As_provided
 d_b=TableA1[bar_number][0]
 
 possible_Cb_values=[(3+0.5*d_b), (0.5*bar_spacing)] #the smaller of either the distance from the center of the bar to the nearest concrete surface or one-half the center to center spacing of the bars being developed
-c_b=np.min(possible_Cbvalues)
+c_b=np.min(possible_Cb_values)
 
 if ((c_b+K_tr)/d_b) >2.5:
   denominator=2.5
