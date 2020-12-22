@@ -1,30 +1,13 @@
-# Imports
-Import numpy as np
+# imports
+import numpy as np
 
-#Assumption (ACI)
-wall_width_ft=1
-w_e_lbperft3=100
-# User input
-service_DeadLoad_kft=int(input())
-service_LiveLoad_kft=int(input())
-f_c_psi=int(input())
-f_y=int(input())
-allowable_soil_press_ksf=int(input())
-ftgBottom_BelowGround_ft=int(input())
-assumed_FTG_thickness_in=int(input())
 
-# Tables needed as dictionaries:
-# Table5_1 in the format of (f_y,f_c_psi):K_D
-Table5_1={(40000,3000):54.8,(40000,4000):47.4,(40000,5000):42.4,(40000,6000):38.7,
-          (50000,3000):68.5,(50000,4000):59.3,(50000,5000):53.0,(50000,6000):48.4,
-          (60000,3000):82.2,(60000,4000):71.2,(60000,5000):63.6,(60000,6000):58.1,
-         (75000,3000):102.7,(75000,4000):88.9,(75000,5000):79.5,(75000,6000):72.6
+## Tables as Dictionaries
 
-}
-# TableA1 in the format of (bar_number):[d_b, area]
+#bar#:(Diameter, Area)
 TableA1={3:[0.375,0.11], 4:[0.500,0.20], 5:[0.625, 0.31], 6:[0.750,0.44], 7:[0.875,0.60], 8:[1.000,0.79], 9:[1.128,1.00], 10:[1.270,1.27], 11:[1.410,1.56], 14:[1.693,2.25], 18:[2.257,4.00]}
 
-# Table A2 in the format of (bar#,# of bars):area
+#(bar#,# of bar):area
 TableA2={(3,1):0.11, (3,2):0.22, (3,3):0.33, (3,4):0.44, (3,5):0.55, (3,6):0.66, (3,7):0.77, (3,8):0.88, (3,9):0.99, (3,10):1.10, (3,11):1.21, (3,12):1.32, (3,13):1.43, (3,14):1.54, (3,15):1.65, (3,16):1.76, (3,17):1.87, (3,18):1.98, (3,19):2.09, (3,20):2.20,
          (4,1):0.20, (4,2):0.40, (4,3):0.60, (4,4):0.80, (4,5):1.00, (4,6):1.20, (4,7):1.40, (4,8):1.60, (4,9):1.80, (4,10):2.00, (4,11):2.20, (4,12):2.40, (4,13):2.60, (4,14):2.80, (4,15):3.00, (4,16):3.20, (4,17):3.40, (4,18):3.60, (4,19):3.80, (4,20):4.00,
          (5,1):0.31, (5,2):0.62, (5,3):0.93, (5,4):1.24, (5,5):1.55, (5,6):1.86, (5,7):2.17, (5,8):2.48, (5,9):2.79, (5,10):3.10, (5,11):3.41, (5,12):3.72, (5,13):4.03, (5,14):4.34, (5,15):4.65, (5,16):4.96, (5,17):5.27, (5,18):5.58, (5,19):5.89, (5,20):6.20,
@@ -36,7 +19,7 @@ TableA2={(3,1):0.11, (3,2):0.22, (3,3):0.33, (3,4):0.44, (3,5):0.55, (3,6):0.66,
          (11,1):1.56,(11,2):3.12,(11,3):4.68,(11,4):6.24,(11,5):7.80,(11,6):9.36,(11,7):10.9,(11,8):12.5,(11,9):14.0,(11,10):15.6,(11,11):17.2,(11,12):18.7,(11,13):20.3,(11,14):21.8,(11,15):23.4,(11,16):25.0,(11,17):26.5,(11,18):28.1,(11,19):29.6,(11,20):31.2
  }
 
-# TableA4 in the format of (bar#,spacing):area
+ # (bar#,spacing):area
 TableA4={(3,2):0.66, (3,2.5):0.53, (3,3):0.44, (3,3.5):0.38, (3,4):0.33, (3,4.5):0.29, (3,5):0.26, (3,5.5):0.24, (3,6):0.22, (3,6.5):0.20, (3,7):0.19, (3,7.5):0.18, (3,8):0.16, (3,9):0.15, (3,10):0.13, (3,11):0.12, (3,12):0.11, (3,13):0.10, (3,14):0.09, (3,15):0.09, (3,16):0.08, (3,17):0.08, (3,18):0.07,
          (4,2):1.20, (4,2.5):0.96, (4,3):0.80, (4,3.5):0.69, (4,4):0.60, (4,4.5):0.53, (4,5):0.48, (4,5.5):0.44, (4,6):0.40, (4,6.5):0.37, (4,7):0.34, (4,7.5):0.32, (4,8):0.30, (4,9):0.27, (4,10):0.24, (4,11):0.22, (4,12):0.20, (4,13):0.18, (4,14):0.17, (4,15):0.16, (4,16):0.15, (4,17):0.14, (4,18):0.13,
          (5,2):1.86, (5,2.5):1.49, (5,3):1.24, (5,3.5):1.06, (5,4):0.93, (5,4.5):0.83, (5,5):0.74, (5,5.5):0.68, (5,6):0.62, (5,6.5):0.57, (5,7):0.53, (5,7.5):0.50, (5,8):0.46, (5,9):0.41, (5,10):0.37, (5,11):0.34, (5,12):0.31, (5,13):0.29, (5,14):0.27, (5,15):0.25, (5,16):0.23, (5,17):0.22, (5,18):0.21,
@@ -48,14 +31,13 @@ TableA4={(3,2):0.66, (3,2.5):0.53, (3,3):0.44, (3,3.5):0.38, (3,4):0.33, (3,4.5)
                                                             (11,4):4.68,(11,4.5):4.16,(11,5):3.74,(11,5.5):3.40,(11,6):3.12,(11,6.5):2.88,(11,7):2.67,(11,7.5):2.50,(11,8):2.34,(11,9):2.08,(11,10):1.87,(11,11):1.70,(11,12):1.56,(11,13):1.44,(11,14):1.34,(11,15):1.25,(11,16):1.17,(11,17):1.10,(11,18):1.04
 }
 
-# TableA5 in the format of (fy,fc):min
+# (fy,fc):min
 TableA5={(40000,3000):0.0050, (40000,4000):0.0050, (40000,5000):0.0053, (40000,6000):0.0058,
          (50000,3000):0.0040, (50000,4000):0.0040, (50000,5000):0.0042, (50000,6000):0.0046,
          (60000,3000):0.0033, (60000,4000):0.0033, (60000,5000):0.0035, (60000,6000):0.0039,
          (75000,3000):0.0027, (75000,4000):0.0027, (75000,5000):0.0028, (75000,6000):0.0031
          }
 
-#TableA7:
 #Assume tension controls Et>0.005, phi=0.9 is correct
 # for fc=3,000 psi, fy=40,000 psi, kbar in ksi
 #kbar:rho
@@ -66,7 +48,6 @@ TableA7={0.0397:0.0010, 0.0436:0.0011, 0.0476:0.0012, 0.0515:0.0013, 0.0554:0.00
 
 }
 
-#TableA8
 #Assume tension controls Et>0.005, phi=0.9 is correct
 # for fc=3,000 psi, fy=60,000 psi, kbar in ksi
 #kbar:rho
@@ -75,7 +56,6 @@ TableA8={0.0593:0.0010, 0.0651:0.0011, 0.0710:0.0012, 0.0768:0.0013, 0.0826:0.00
          0.5657:0.0108, 0.5702:0.0109, 0.5746:0.0110, 0.5791:0.0111, 0.5835:0.0112, 0.5879:0.0113, 0.5923:0.0114, 0.5967:0.0115, 0.6011:0.0116, 0.6054:0.0117, 0.6098:0.0118, 0.6141:0.0119, 0.6184:0.0120, 0.6227:0.0121, 0.6270:0.0122, 0.6312:0.0123, 0.6355:0.0124, 0.6398:0.0125, 0.6440:0.0126, 0.6482:0.0127, 0.6524:0.0128, 0.6566:0.0129, 0.6608:0.0130, 0.6649:0.0131, 0.6691:0.0132, 0.6732:0.0133, 0.6773:0.0134, 0.6814:0.0135, 0.6835:0.01355
 }
 
-#TableA9
 #Assume tension controls Et>0.005, phi=0.9 is correct
 # for fc=4,000 psi, fy=40,000 psi, kbar in ksi
 #kbar:rho
@@ -86,7 +66,6 @@ TableA9={0.0398:0.0010, 0.0437:0.0011, 0.0477:0.0012, 0.0516:0.0013, 0.0555:0.00
          0.6626:0.0186, 0.7927:0.0229, 0.9113:0.0271
 }
 
-#TableA10
 #Assume tension controls Et>0.005, phi=0.9 is correct
 # for fc=4,000 psi, fy=60,000 psi, kbar in ksi
 #kbar:rho
@@ -98,7 +77,6 @@ TableA10={0.0595:0.0010, 0.0654:0.0011, 0.0712:0.0012, 0.0771:0.0013, 0.0830:0.0
 
 }
 
-#TableA11
 #Assume tension controls Et>0.005, phi=0.9 is correct
 # for fc=5,000 psi, fy=60,000 psi, kbar in ksi
 #kbar:rho
@@ -109,192 +87,166 @@ TableA11={0.0596:0.0010, 0.0655:0.0011, 0.0714:0.0012, 0.0773:0.0013, 0.0832:0.0
           0.8609:0.0162, 1.0047:0.0194, 1.0838:0.02125
 }
 
-# Some Table conditions for Table7-Table11
-if f_y==40000 and f_c_psi==3000:
-  print("Please refer to TableA7 for value of reinforcement ratio rho corresponding to the calculated coefficient of resistance kbar")
-  table_of_reference==TableA7
-elif f_y==40000 and f_c_psi==4000:
-  print("Please refer to TableA9 for value of reinforcement ratio rho corresponding to the calculated coefficient of resistance kbar")
-  table_of_reference==TableA9
-elif f_y==60000 and f_c_psi==3000:
-  print("Please refer to TableA8 for value of reinforcement ratio rho corresponding to the calculated coefficient of resistance kbar")
-  table_of_reference==TableA8
-elif f_y==60000 and f_c_psi==4000:
-  print("Please refer to TableA10 for value of reinforcement ratio rho corresponding to the calculated coefficient of resistance kbar")
-  table_of_reference==TableA10
-elif f_y==60000 and f_c_psi==5000:
-  print("Please refer to TableA11 for value of reinforcement ratio rho corresponding to the calculated coefficient of resistance kbar")
-  table_of_reference==TableA11
-else:
-  print("Please enter a value of f_c_psi")
+#(fy,fc):K_D
+Table5_1={(40000,3000):54.8,(40000,4000):47.4,(40000,5000):42.4,(40000,6000):38.7,
+          (50000,3000):68.5,(50000,4000):59.3,(50000,5000):53.0,(50000,6000):48.4,
+          (60000,3000):82.2,(60000,4000):71.2,(60000,5000):63.6,(60000,6000):58.1,
+         (75000,3000):102.7,(75000,4000):88.9,(75000,5000):79.5,(75000,6000):72.6
 
-# Initial calculations:
+}
 
-# Calculates Service Load
-w_kip_per_ft=service_DeadLoad_kft+service_LiveLoad_kft
-
-# Calculates Factored Load
-wu_kip_per_ft=1.2*(service_DeadLoad_kft)+1.6*(service_LiveLoad_kft)
-
-# Calculates Weight of Footing
-ftg_wt_ksf=0.150*(assumed_FTG_thickness_in/12)
-
-# Calculates depth of earth
-earth_Wt_ksf=(depth_of_earth_in*w_e_lbperft3)/(12*1000)
-
-# Calculates net available soil pressure
-net_available_soilpress=allowable_soil_press_ksf-ftg_wt_ksf-earth_Wt_ksf
-
-# Calculates required footing Width
-req_FTGwidth_ft=w_kip_per_ft/net_available_soilpress
-
-# Use this footing width
-Use_FTGwidth=round(np.round((req_FTGwidth_ft*12))/12,2)
-
-# Calculates factored soil pressure
-factoredSoilPress_ksf=wu_kip_per_ft/Use_FTGwidth
-
-# Calculates assumed effective depth d for the footing
-bar_assumption=int(input())
-bar_diameter=TableA1[bar_assumption][0]
-assumed_effective_depth_d_in=assumed_FTG_thickness_in-3-0.5*(bar_diameter)
-
-#--------------------------------------------------------------------------------------------------------------------------
-# Shear calculations and Check:
-# Calculates shear and its critical section
-L=0.5*(Use_FTGwidth-wall_width_ft)-(assumed_effective_depth_d_in/12)
-shear_Vu_kip_per_ftofwall=factoredSoilPress_ksf*np.round(L,2)
-# Calculates Total shear strength
-shear_strength_phiVc_kip_per_ftofwall=(0.75*2*np.sqrt(f_c_psi)*(wall_width_ft*12)*(assumed_effective_depth_d_in))/1000
-# Shear check
-if shear_Vu_kip_per_ftofwall<shear_strength_phiVc_kip_per_ftofwall:
-  print("The assumed thickness of footing is satisfactory for shear, no revisions are necessary with respect to footing weight")
-else:
-  print("Please use another thickness of footing")
-
-#------------------------------------------------------------------------------------------------------------------
-#  Moment Calculations:
-# Find Critical Section for different types of wall (concrete vs. masonry)
-def momentCS(wall_type):
-  if wall_type=='masonry':
-    return 0.5*(Use_FTGwidth-wall_width_ft)+0.25*(wall_width_ft)
-  elif wall_type=='concrete':
-    return 0.5*(Use_FTGwidth-wall_width_ft)-(assumed_effective_depth_d_in/12)
-  else:
-    print('Please enter a wall type')
-L_moment=momentCS(str(input()))           # enter type of wall: either 'masonry' or 'concrete'
-
-# Maximum Factored moment
-moment_Mu=0.5*factoredSoilPress_ksf*L_moment**2
+class Structural_footing:
+    print("Please first enter given value of f_y, can either be 40000 psi or 60000 psi:")
+    f_y=int(input())
+    print("Please also enter given value of f_c_psi. For f_y=40000 psi, possible values of f_c_psi are 3000 psi and 4000 psi. For f_y=60000 psi, possible values of f_c_psi are 3000 psi ,4000 psi, and 5000 psi:")
+    f_c_psi=int(input())
+    def __init__(self,wall_width_ft=1,w_e_lbperft3=100,assumed_FTG_thickness_in=None,service_DeadLoad_kft=None,service_LiveLoad_kft=None, f_c_psi=f_c_psi, f_y=f_y,allowable_soil_press_ksf=None, ftgBottom_BelowGround_ft=None,bar_assumption=None,wall_type=['masonry,concrete']):
+        self.wall_width_ft=wall_width_ft
+        self.w_e_lbperft3=w_e_lbperft3
+        self.assumed_FTG_thickness_in=assumed_FTG_thickness_in
+        self.service_DeadLoad_kft=service_DeadLoad_kft
+        self.service_LiveLoad_kft=service_LiveLoad_kft
+        self.f_c_psi=f_c_psi
+        self.f_y=f_y
+        self.allowable_soil_press_ksf=allowable_soil_press_ksf
+        self.ftgBottom_BelowGround_ft=ftgBottom_BelowGround_ft
+        self.bar_assumption=bar_assumption
+        self.wall_type=wall_type
+    def table_of_reference(self):
+        if self.f_y==40000 and self.f_c_psi==3000:
+            return dict(TableA7)
+        elif self.f_y==40000 and self.f_c_psi==4000:
+            return dict(TableA9)
+        elif self.f_y==60000 and self.f_c_psi==3000:
+            return dict(TableA8)
+        elif self.f_y==60000 and self.f_c_psi==4000:
+            return dict(TableA10)
+        elif self.f_y==60000 and self.f_c_psi==5000:
+            return dict(TableA11)
+        else:
+            print("Please enter a value of f_c_psi")
+    def service_load(self):
+        return self.service_DeadLoad_kft+self.service_LiveLoad_kft
+    def factored_load(self):
+        return 1.2*self.service_DeadLoad_kft+1.6*self.service_LiveLoad_kft
+    def footing_weight(self,assumed_FTG_thickness_in):
+        if self.assumed_FTG_thickness_in:
+            return 0.150*(self.assumed_FTG_thickness_in/12)
+    def depth_earth(self):
+        return (self.ftgBottom_BelowGround_ft)*12-self.assumed_FTG_thickness_in
+    def earth_weight(self):
+        return (self.depth_earth()*self.w_e_lbperft3)/(12*1000)
+    def net_soil_press(self):
+        return self.allowable_soil_press_ksf-self.footing_weight(self.assumed_FTG_thickness_in)-self.earth_weight()
+    def req_FTG_width(self):
+        return self.service_load()/self.net_soil_press()
+    def use_FTG_width(self):
+        return round(np.round((self.req_FTG_width()*12))/12,2)
+    def factoredSoilPress_ksf(self):
+        return self.factored_load()/self.use_FTG_width()
+    def bar_diameter(self):
+        return TableA1[self.bar_assumption][0]
+    def assumed_effective_depth(self):
+        return self.assumed_FTG_thickness_in-3-0.5*self.bar_diameter()
+    def shear_Vu_(self):
+        L=0.5*(self.use_FTG_width()-self.wall_width_ft)-(self.assumed_effective_depth()/12)
+        return self.factoredSoilPress_ksf()*np.round(L,2)
+    def shear_strength_phiVc(self):
+        return (0.75*2*np.sqrt(self.f_c_psi)*(self.wall_width_ft*12)*(self.assumed_effective_depth()))/1000
+    def shear_check(self):
+        if self.shear_Vu_()<self.shear_strength_phiVc():
+            print("The assumed thickness of footing is satisfactory for shear, no revisions are necessary with respect to footing weight")
+        else:
+            print('Please stop and re-run the class Structural_footing and enter another assumed_footing_thickness that is greater than the inital assumption.')
 
 
+    def momentCS(self):
+        if self.wall_type=='masonry':
+            return 0.5*(self.use_FTG_width()-self.wall_width_ft)+0.25*(self.wall_width_ft)
+        elif self.wall_type=='concrete':
+            return 0.5*(self.use_FTG_width()-self.wall_width_ft)-(self.assumed_effective_depth())/12
+        else:
+            return None
+    def moment_Mu(self):
+        return 0.5*self.factoredSoilPress_ksf()*self.momentCS()**2
+    def reqKbar(self):
+        return (self.moment_Mu()*12)/(0.9*12*self.assumed_effective_depth()**2)
+    def rho(self):
+        listofrho=[]
+        for kbar,rho_Options in dict(self.table_of_reference()).items():
+            if kbar>=self.reqKbar():
+                listofrho.append(rho_Options)
+        return np.min(listofrho)
+    def reqA_s(self):
+        return self.rho()*(self.wall_width_ft*12)*self.assumed_effective_depth()
+    def As_min(self):
+        return TableA5[self.f_y,self.f_c_psi]*(self.wall_width_ft*12)*self.assumed_effective_depth()
+    def reqA_s_Slabs_grade60Steel(self):
+        return 0.0018*(self.wall_width_ft*12)*self.assumed_FTG_thickness_in
+    def Controlling_As(self):
+        return np.max([self.reqA_s(),self.As_min(),self.reqA_s_Slabs_grade60Steel()])
+    def AS_available(self):
+        listofAS=[]
+        for barNum_spacing, area_steel in TableA4.items():
+            if area_steel>=self.Controlling_As():
+                listofAS.append(barNum_spacing)
+        return listofAS
+    def design(self):
+        print("You can choose any tuple in the listofAs given by function AS_available(), where (Bar number, Bar spacing) and that will be what you use for reinforcement.")
+        print("Bar number (first number of tuple):")
+        bar_number=int(input())
+        print("Bar spacing(second number of tuple):")
+        bar_spacing=int(input())
+        As_provided=TableA4[(bar_number,bar_spacing)]
+        return print("Use No.",bar_number," at ", bar_spacing, "in.oc. (As = ",As_provided,"in^2).")
+    def development_length(self):
+        print("Please re-enter your chosen bar number from design() for the design for calculating the development length:")
+        bar_number=int(input())
+        print("Please re-enter your chosen bar spacing from design() for the design for calculating the development length:")
+        bar_spacing=int(input())
+        As_provided=TableA4[(bar_number,bar_spacing)]
+    #reinforcement_location_t=1
+    #coating_e=1
+        if 3<=bar_number<=6:
+            reinforcement_size_s=0.8
+        elif 7<=bar_number<=11:
+            reinforcement_size_s=1
+        else:
+            print("please enter a bar number within the range")
+        numerator=1*1*reinforcement_size_s
+        lambda_value=1          #normal-weight concrete
+        K_tr=0                  #permitted by ACI Code (conservative)
+        K_ER=self.Controlling_As()/As_provided
+        d_b=TableA1[bar_number][0]
+        c_b=np.min([(3+0.5*d_b), (0.5*bar_spacing)]) #the smaller of either the distance from the center of the bar to the nearest concrete surface or one-half the center to center spacing of the bars being developed
 
-#-------------------------------------------------------------------------------------------------------
-#Reinforcement:
-phi=0.9 #(assumption by ACI)
-# Coefficient of Resistance Kbar
-reqKbar=(moment_Mu*12)/(phi*12*assumed_effective_depth_d_in**2)
-#Reinforcement Ratio Rho (using Tables A7-11)
-listofrho=[]
-table_of_reference_dict=dict(table_of_reference)
-for kbar, rho_Options in table_of_reference_dict.items():
-    if kbar>=reqKbar:
-      listofrho.append(rho_Options)
-      rho=np.min(listofrho)
-rho
-# Required Area of Tension Steel:
-reqA_s=rho*(wall_width_ft*12)*assumed_effective_depth_d_in
-As_min=TableA5[f_y,f_c_psi]*(wall_width_ft*12)*assumed_effective_depth_d_in
-reqA_s_Slabs_grade60Steel=0.0018*(wall_width_ft*12)*assumed_FTG_thickness_in
-Controlling_As=np.max([reqA_s,As_min,reqA_s_Slabs_grade60Steel]
-
-# Find Bar number with spacing that provides sufficient area of tension steel
-listofAS=[]
-for barNum_spacing, area_steel in TableA4.items():
-    if area_steel>=Controlling_As:
-     listofAS.append(barNum_spacing)
-listofAS
-
-# Design of tension steel:
-#To design, user can choose any of the options in the listofAs, which contains areas of steel that satifies the area requirement
-print("You can choose any tuple in the listofAs, where (Bar number, Bar spacing) and that will be what you use for reinforcement.")
-print("Bar number (first number of tuple):")
-bar_number=int(input())
-print("Bar spacing(second number of tuple):")
-bar_spacing=int(input())
-
-As_provided=TableA4[(bar_number,bar_spacing)]
-print("Use No.",bar_number," at ", bar_spacing, "in.oc. (As = ",As_provided,"in^2).")
-
-#------------------------------------------------------------------------------------------------------------
-# Calculation of development length and Check:
-# Development Length
-reinforcement_location_t=1 #assumed ACI
-
-coating_e=1                #assumed ACI
-
-if 3<=bar_number<=6:
-  reinforcement_size_s=0.8
-elif 7<=bar_number<=11:
-  reinforcement_size_s=1
-else:
-  "Please enter a bar number within the range."
-
-numerator=reinforcement_location_t*coating_e*reinforcement_size_s
-
-lambda_value=1          #normal-weight concrete
-
-K_tr=0                  #permitted by ACI Code (conservative)
-
-K_ER=Controlling_As/As_provided
-
-d_b=TableA1[bar_number][0]
-
-possible_Cb_values=[(3+0.5*d_b), (0.5*bar_spacing)] #the smaller of either the distance from the center of the bar to the nearest concrete surface or one-half the center to center spacing of the bars being developed
-c_b=np.min(possible_Cb_values)
-
-if ((c_b+K_tr)/d_b) >2.5:
-  denominator=2.5
-else:
-  denominator=(c_b+K_tr)/d_b
-
-K_D=Table5_1[(f_y,f_c_psi)]
-
-development_length_l_d=(K_D/lambda_value)*(numerator/denominator)*K_ER*d_b
-l_available_in=(L_moment*12)-3
-# check of development length
-if development_length_l_d>=12:
-  development_length_l_d=development_length_l_d
-  if development_length_l_d<=l_available_in:
-    print("The development length provided is adequate.")
-  else:
-    print("The development length provided is not adequate.")
-else:
-  development_length_l_d=12
-  if development_length_l_d<=l_available_in:
-    print("The development length provided is adequate.")
-  else:
-    print("The development length provided is not adequate.")
-development_length_l_d
-
-#---------------------------------------------------------------------------
-# Longitudinal Steel Calculations and design:
-
-#Longitudinal steel area
-longitudinal_steel=0.0018*req_FTGwidth_ft*12*assumed_FTG_thickness_in
-# Find Bar number and numbers of bars used that provides sufficient area of longitudinal steel
-listofAS_longitudinal_steel=[]
-for barNum_numofbar, area_provided in TableA2.items():
-    if area_provided>=longitudinal_steel:
-     listofAS_longitudinal_steel.append(barNum_numofbar)
-listofAS_longitudinal_steel
-
-# Design of longitudinal steel
-#To design, user can choose any of the options in the listofAs_longitudinal_steel, which contains areas of steel that satifies the area requirement
-print("You can choose any tuple in the listofAs_longitudinal, where (Bar number, Number of bars) and that will be what you use for reinforcement.")
-print("Bar number (first number of tuple):")
-bar_num_longitudinal=int(input())
-print("Number of bars (second number of tuple):")
-num_bars=int(input())
-As_longitudinal_provided=TableA2[(bar_num_longitudinal,num_bars)]
-print("Use ",num_bars," No. ", bar_num_longitudinal, " bars (As = ",As_longitudinal_provided,"in^2) spaced equally")
+        if ((c_b+K_tr)/d_b) >2.5:
+            denominator=2.5
+        else:
+            denominator=(c_b+K_tr)/d_b
+        K_D=Table5_1[(f_y,f_c_psi)]
+        return (K_D/lambda_value)*(numerator/denominator)*K_ER*d_b
+    def l_available(self):
+        return (self.momentCS()*12)-3
+    def check(self):
+        if self.development_length()<=self.l_available():
+            print("The development length provided is adequate.")
+        else:
+            print("The development length provided is not adequate.")
+    def longitudinal_steel(self):
+        return 0.0018*self.req_FTG_width() *12*self.assumed_FTG_thickness_in
+    def AS_longitudinal_available(self):
+        listofAS_longitudinal_steel=[]
+        for barNum_numofbar, area_provided in TableA2.items():
+            if area_provided>=self.longitudinal_steel():
+                listofAS_longitudinal_steel.append(barNum_numofbar)
+        return listofAS_longitudinal_steel
+    def design_longitudinal(self):
+    #To design, user can choose any of the options in the listofAs_longitudinal_steel, which contains areas of steel that satifies the area requirement
+        print("You can choose any tuple in the listofAs_longitudinal from AS_longitudinal_available(), where (Bar number, Number of bars) and that will be what you use for reinforcement.")
+        print("Bar number (first number of tuple):")
+        bar_num_longitudinal=int(input())
+        print("Number of bars (second number of tuple):")
+        num_bars=int(input())
+        As_longitudinal_provided=TableA2[(bar_num_longitudinal,num_bars)]
+        return print("Use ",num_bars," No. ", bar_num_longitudinal, " bars (As = ",As_longitudinal_provided,"in^2) spaced equally")
