@@ -33,7 +33,8 @@ print(stru.development_length_checker())
 print([stru.AS_longitudinal_available()])
 design_for_longitudinal=stru.design_longitudinal()
 
-
+# Note: output needs user to input information!!! ****************************************************************************
+# Below is what I did for this problem in the output
 
 # To use the class Structural footing:
 # assigned variable=Structural_footing(wall_width_ft, w_e_lbperft3, assumed_FTG_thickness_in, service_DeadLoad_kft, service_LiveLoad_kft, f_c_psi, f_y, allowable_soil_press_ksf, ftgBottom_BelowGround_ft, bar_assumption, wall_type)
