@@ -13,6 +13,8 @@ from source import Structural_footing
 # wall_type= masonry
 # assumed_FTG_thickness_in=18
 # bar_assumption=8
+
+# Solving using Structural_footing:
 stru=Structural_footing(1,100,18,10,20,3000,60000,5,4,8,'masonry')
 # print of results:
 print(stru)
