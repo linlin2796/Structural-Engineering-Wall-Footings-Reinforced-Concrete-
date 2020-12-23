@@ -93,5 +93,5 @@ Finally we can solve and print the results:
 * User needs to choose a tuple from the list, and input the bar number (first number of tuple) into the first input, press enter, and input number of bars (second number of tuple) into the second input.
 
 * An image of Output from example in test.py is shown below:
-![image](https://user-images.githubusercontent.com/73927161/102952064-451c4680-449c-11eb-824a-917e71155fb6.png)
+![image](https://user-images.githubusercontent.com/73927161/102955399-cdeab080-44a3-11eb-9077-c1934546f602.png)
 More details are provided in test.py
