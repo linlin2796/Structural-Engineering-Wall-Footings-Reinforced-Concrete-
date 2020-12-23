@@ -44,7 +44,7 @@ design_for_longitudinal=stru.design_longitudinal()
 # shear check: The assumed thickness of footing is satisfactory for shear, no revisions are necessary with respect to footing weight
 # moment: 31.39114692653673
 
-# Then it will get excecuted further and return a list of available options of designing steel
+# Then it will get executed further and return a list of available options of designing steel
 # Pick a tuple: I picked (6,9) and input the first value 6 into the bar number(first input) and 9 into the bar spacing (second input)
 # The program will return a statement with the design chosen and also provide the corresponding area of steel from the table
 # my result: Use No. 6  at  9 in.oc. (As =  0.59 in^2).
@@ -57,4 +57,4 @@ design_for_longitudinal=stru.design_longitudinal()
 # The program will return a statement with the design chosen and also provide the corresponding area of steel from the table
 # my result: Use  9  No.  5  bars (As =  2.79 in^2) spaced equally
 
-# An image of the ouput of the example is provided in README.md for reference
+# An image of the output of the example is provided in README.md for reference
