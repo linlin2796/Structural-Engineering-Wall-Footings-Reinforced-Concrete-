@@ -75,7 +75,7 @@ First, instantiate a new object of Structural_footing by following the format be
 
 Finally we can solve and print the results:
 ![image](https://user-images.githubusercontent.com/73927161/102952223-afcd8200-449c-11eb-932a-b303486c53b6.png)
-*************Must read*****************
+############# Must read 
 ***Note for the output (if not sure, please check test.py for example):
 * The program will first need user to input values of f_y and f_c_psi once more: remember that f_y is either 40000 or 60000, and f_c_psi is 3000,4000, or 5000  (provided by the problem). For f_y=40000, the options of f_c_psi are 3000 and 4000. For f_y=60000, the options of f_c_psi are 3000,4000, and 5000. This is required by the use of tables.
 
@@ -89,7 +89,8 @@ Finally we can solve and print the results:
 * Program returns development length and adequacy check
 
 * Then, it will return a list of available options for area of longitudinal steel for user to pick for designing
-*User needs to choose a tuple from the list, and input the bar number (first number of tuple) into the first input, press enter, and input number of bars (second number of tuple) into the second input.
+* User needs to choose a tuple from the list, and input the bar number (first number of tuple) into the first input, press enter, and input number of bars (second number of tuple) into the second input.
 
 * An image of Output from example in test.py is shown below:
 ![image](https://user-images.githubusercontent.com/73927161/102952064-451c4680-449c-11eb-824a-917e71155fb6.png)
+More details are provided in test.py
