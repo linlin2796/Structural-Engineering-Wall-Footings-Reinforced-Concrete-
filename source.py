@@ -95,12 +95,27 @@ Table5_1={(40000,3000):54.8,(40000,4000):47.4,(40000,5000):42.4,(40000,6000):38.
 
 }
 
+
 class Structural_footing:
+    # When executing, need to first input the given value of f_y and f_c_psi in units of psi for purpose of finding reference table for later calculations.
     print("Please first enter given value of f_y, can either be 40000 psi or 60000 psi:")
     f_y=int(input())
     print("Please also enter given value of f_c_psi. For f_y=40000 psi, possible values of f_c_psi are 3000 psi and 4000 psi. For f_y=60000 psi, possible values of f_c_psi are 3000 psi ,4000 psi, and 5000 psi:")
     f_c_psi=int(input())
     def __init__(self,wall_width_ft=1,w_e_lbperft3=100,assumed_FTG_thickness_in=None,service_DeadLoad_kft=None,service_LiveLoad_kft=None, f_c_psi=f_c_psi, f_y=f_y,allowable_soil_press_ksf=None, ftgBottom_BelowGround_ft=None,bar_assumption=None,wall_type=['masonry,concrete']):
+        """ This is the initiation of the class Structural_footing by inputting the neccessary initial values given by
+    the problem.
+    * wall width in feet: wall_width_ft (ACI:assumed 1)
+    * weight of earth on(soil) top of footing in lb/ft^3: w_e_lbperft3 (ACI: usually use 100)
+    * initially assumed footing thickness in inches: assumed_FTG_thickness_in (ACI: usually can be anywhere between 1-1.5 * wall width (which is 1ft =12 inches))
+    * service dead load in k-ft: service_DeadLoad_kft (given by problem)
+    * service live load in k-ft: service_LiveLoad_kft (given by problem)
+    * fc in psi: f_c_psi (given by problem)
+    * fy in psi: f_y (given by problem)
+    * allowable soil pressure in ksf: allowable_soil_press_ksf (given by problem)
+    * distance from footing bottom to the ground in feet: ftgBottom_BelowGround_ft (given by problem)
+    * initial assumption of bar number to use: bar_assumption (can be a guess from user, but ACI usually recommend bar number 8, so can input 8)
+    * wall type (masonry or concrete, type as string): wall_type (given by problem)"""
         self.wall_width_ft=wall_width_ft
         self.w_e_lbperft3=w_e_lbperft3
         self.assumed_FTG_thickness_in=assumed_FTG_thickness_in
@@ -112,7 +127,10 @@ class Structural_footing:
         self.ftgBottom_BelowGround_ft=ftgBottom_BelowGround_ft
         self.bar_assumption=bar_assumption
         self.wall_type=wall_type
+
+
     def table_of_reference(self):
+        """ This function finds the appropriate table for reference according the input values of f_y and f_c_psi previously"""
         if self.f_y==40000 and self.f_c_psi==3000:
             return dict(TableA7)
         elif self.f_y==40000 and self.f_c_psi==4000:
@@ -125,88 +143,167 @@ class Structural_footing:
             return dict(TableA11)
         else:
             print("Please enter a value of f_c_psi")
+
+
     def service_load(self):
+        """ This function calculates the service load given service dead load and live load"""
         return self.service_DeadLoad_kft+self.service_LiveLoad_kft
+
+
     def factored_load(self):
+        """ This function calculates the factored load given service dead load and live load"""
         return 1.2*self.service_DeadLoad_kft+1.6*self.service_LiveLoad_kft
+
+
     def footing_weight(self,assumed_FTG_thickness_in):
+        """ This function calculates the footing weight given the assumed footing thickness and using the ACI value for weight of normal concrete"""
         if self.assumed_FTG_thickness_in:
             return 0.150*(self.assumed_FTG_thickness_in/12)
+
+
     def depth_earth(self):
+        """ This function calculates the depth of earth given the distance of footing bottom to the ground and the assumed footing thickness"""
         return (self.ftgBottom_BelowGround_ft)*12-self.assumed_FTG_thickness_in
+
+
     def earth_weight(self):
+        """ This function calculates the weight of earth based on the depth of earth calculated previously and the weight of soil provided before"""
         return (self.depth_earth()*self.w_e_lbperft3)/(12*1000)
+
+
     def net_soil_press(self):
+        """ This function calculates the net soil pressure based on the allowable soil pressure provided by the problem, footing weight and earth weight calculated previously, and the assumed thickness of footing"""
         return self.allowable_soil_press_ksf-self.footing_weight(self.assumed_FTG_thickness_in)-self.earth_weight()
+
+
     def req_FTG_width(self):
+        """ This function calculates the required footing width, based on the service load and net soil pressure calculated previously"""
         return self.service_load()/self.net_soil_press()
+
+
     def use_FTG_width(self):
+        """This function calculates the footing width user can use for calculation after determining the required footing width in the previous function"""
         return round(np.round((self.req_FTG_width()*12))/12,2)
+
+
     def factoredSoilPress_ksf(self):
+        """This function calculates the factored soil pressure in ksf based on the factored load and the footing width used"""
         return self.factored_load()/self.use_FTG_width()
+
+
     def bar_diameter(self):
+        """This function helps user find the bar diameter from table corresponding to the bar number assumed previously"""
         return TableA1[self.bar_assumption][0]
+
+
     def assumed_effective_depth(self):
+        """This function calculates the assumed effective depth based on the assumed footing thickness and the diameter of the bar assumed"""
         return self.assumed_FTG_thickness_in-3-0.5*self.bar_diameter()
+
+
     def shear_Vu_(self):
+        """This function calculates the shear based on the footing width used, wall width, and assumed effective depth"""
         L=0.5*(self.use_FTG_width()-self.wall_width_ft)-(self.assumed_effective_depth()/12)
         return self.factoredSoilPress_ksf()*np.round(L,2)
+
+
     def shear_strength_phiVc(self):
+        """This function finds the available shear strength based on the f_c_psi, wall width, and assumed effective depth"""
         return (0.75*2*np.sqrt(self.f_c_psi)*(self.wall_width_ft*12)*(self.assumed_effective_depth()))/1000
+
+
     def shear_check(self):
+        """ This function checks whether calculated shear is less than the available shear, which determines whether if the assumed thickness of footing satisfies the requirement.
+        ****Note:
+        If it does not satisfy, please assume a higher value of assumed_FTG_thickness_in, and re-run the whole class with the new value of assumed_FTG_thickness_in"""
         if self.shear_Vu_()<self.shear_strength_phiVc():
-            print("The assumed thickness of footing is satisfactory for shear, no revisions are necessary with respect to footing weight")
+            return ("The assumed thickness of footing is satisfactory for shear, no revisions are necessary with respect to footing weight")
         else:
-            print('Please stop and re-run the class Structural_footing and enter another assumed_footing_thickness that is greater than the inital assumption.')
+            return ('Please stop and re-run the class Structural_footing and enter another assumed_footing_thickness that is greater than the inital assumption.')
 
 
     def momentCS(self):
+        """This function calculates the critical section of moment for calculating moment later on. This depends on the type of wall given by the problem, either concrete or masonry"""
         if self.wall_type=='masonry':
             return 0.5*(self.use_FTG_width()-self.wall_width_ft)+0.25*(self.wall_width_ft)
         elif self.wall_type=='concrete':
             return 0.5*(self.use_FTG_width()-self.wall_width_ft)-(self.assumed_effective_depth())/12
         else:
             return None
+
+
     def moment_Mu(self):
+        """ This function calculates the moment based on the factored soil pressure calculated previously
+        and the critical section of the moment"""
         return 0.5*self.factoredSoilPress_ksf()*self.momentCS()**2
+
+
     def reqKbar(self):
+        """This function calculates the required Kbar based on the moment calculated previously and the assumed effective depth"""
         return (self.moment_Mu()*12)/(0.9*12*self.assumed_effective_depth()**2)
+
+
     def rho(self):
+        """This function help user find rho by using the required kbar value calculated previously to find the appropriate value of rho in the table."""
         listofrho=[]
         for kbar,rho_Options in dict(self.table_of_reference()).items():
             if kbar>=self.reqKbar():
                 listofrho.append(rho_Options)
         return np.min(listofrho)
+
+
     def reqA_s(self):
+        """This function calculates the required area of steel by using the found rho value, wall width, and assumed effective depth"""
         return self.rho()*(self.wall_width_ft*12)*self.assumed_effective_depth()
+
+
     def As_min(self):
+        """This function calculates the minimum area of steel required by ACI by using the value of fy and find the corresponding rho, and also using the wall width and assumed effective depth"""
         return TableA5[self.f_y,self.f_c_psi]*(self.wall_width_ft*12)*self.assumed_effective_depth()
+
+
     def reqA_s_Slabs_grade60Steel(self):
+        """This function calculates the absolute minimum area of steel required by ACI using the wall width and assumed footing thickness"""
         return 0.0018*(self.wall_width_ft*12)*self.assumed_FTG_thickness_in
+
+
     def Controlling_As(self):
+        """This function calculates the controlling area of steel, which is the larger of the three calculated areas"""
         return np.max([self.reqA_s(),self.As_min(),self.reqA_s_Slabs_grade60Steel()])
+
+
     def AS_available(self):
+        """This function helps find the available options of bars and spacing baased on the controlling area and areas provided by the table"""
         listofAS=[]
         for barNum_spacing, area_steel in TableA4.items():
             if area_steel>=self.Controlling_As():
                 listofAS.append(barNum_spacing)
         return listofAS
+
+
     def design(self):
+        """This function allow user to design for reinforcing the steel by using the previous list of available options for areas of steel and letting user inputting what he choose from the list"""
         print("You can choose any tuple in the listofAs given by function AS_available(), where (Bar number, Bar spacing) and that will be what you use for reinforcement.")
         print("Bar number (first number of tuple):")
         bar_number=int(input())
         print("Bar spacing(second number of tuple):")
         bar_spacing=int(input())
         As_provided=TableA4[(bar_number,bar_spacing)]
-        return print("Use No.",bar_number," at ", bar_spacing, "in.oc. (As = ",As_provided,"in^2).")
-    def development_length(self):
+        return print("Use No.",bar_number," at " ,bar_spacing, "in.oc. (As = ",As_provided,"in^2).")
+
+    def l_available(self):
+        """ This function calculates length available"""
+        return (self.momentCS()*12)-3
+
+    def development_length_checker(self):
+        """This function calculates and check the adequacy of the development length based on the chosen design of steel reinforcement."""
         print("Please re-enter your chosen bar number from design() for the design for calculating the development length:")
         bar_number=int(input())
         print("Please re-enter your chosen bar spacing from design() for the design for calculating the development length:")
         bar_spacing=int(input())
         As_provided=TableA4[(bar_number,bar_spacing)]
-    #reinforcement_location_t=1
-    #coating_e=1
+    #reinforcement_location_t=1 (ACI assumption)
+    #coating_e=1    (ACI assumption)
         if 3<=bar_number<=6:
             reinforcement_size_s=0.8
         elif 7<=bar_number<=11:
@@ -224,24 +321,29 @@ class Structural_footing:
             denominator=2.5
         else:
             denominator=(c_b+K_tr)/d_b
-        K_D=Table5_1[(f_y,f_c_psi)]
-        return (K_D/lambda_value)*(numerator/denominator)*K_ER*d_b
-    def l_available(self):
-        return (self.momentCS()*12)-3
-    def check(self):
-        if self.development_length()<=self.l_available():
-            print("The development length provided is adequate.")
+        K_D=Table5_1[(self.f_y,self.f_c_psi)]
+        development_length=(K_D/lambda_value)*(numerator/denominator)*K_ER*d_b
+        if development_length<=self.l_available():
+          return development_length,("The development length provided is adequate.")
         else:
-            print("The development length provided is not adequate.")
+          return development_length,("The development length provided is not adequate.")
+
     def longitudinal_steel(self):
+        """ This function calculate the area for longitudinal steel for considering the shrink and temperature requirement by ACI"""
         return 0.0018*self.req_FTG_width() *12*self.assumed_FTG_thickness_in
+
+
     def AS_longitudinal_available(self):
+        """ This function provides user the available list of areas for longitudinal steel and user can choose any tuple from this list for designing longitudinal steel"""
         listofAS_longitudinal_steel=[]
         for barNum_numofbar, area_provided in TableA2.items():
             if area_provided>=self.longitudinal_steel():
                 listofAS_longitudinal_steel.append(barNum_numofbar)
         return listofAS_longitudinal_steel
+
+
     def design_longitudinal(self):
+        """ This function allow user to input the design they want for longitudinal steel by inputing their choice after looking at the list of available options from the previous function"""
     #To design, user can choose any of the options in the listofAs_longitudinal_steel, which contains areas of steel that satifies the area requirement
         print("You can choose any tuple in the listofAs_longitudinal from AS_longitudinal_available(), where (Bar number, Number of bars) and that will be what you use for reinforcement.")
         print("Bar number (first number of tuple):")
